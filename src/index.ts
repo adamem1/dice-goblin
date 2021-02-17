@@ -1,0 +1,55 @@
+import {
+  createSlashCommandHandler,
+  ApplicationCommand,
+  InteractionHandler,
+  Interaction,
+  InteractionResponse,
+  InteractionResponseType,
+  ApplicationCommandOptionType,
+} from "@glenstack/cf-workers-discord-bot";
+
+import { Dice } from "dice-typescript";
+
+const diceCommand: ApplicationCommand = {
+  name: "roll", 
+  description: "Roll (a) di(c)e.",
+  options: [
+    {
+      name: 'dice',
+      description: 'What kind of dice and how many? Eg 1d20',
+      required: true,
+      type: ApplicationCommandOptionType.STRING
+
+    }
+  ]
+}
+
+const diceHandler: InteractionHandler = async (
+  interaction: Interaction
+  ): Promise<InteractionResponse> => {
+    const userID = interaction.member.user.id
+    const options = interaction.data.options
+    const diceInput =  options[0].value
+    const dice = new Dice();
+    const result = dice.roll(diceInput).total;
+    return {
+      type: InteractionResponseType.ChannelMessageWithSource,
+      data: {
+        content: `Rolled a \`${result}\` for <@${userID}> (${diceInput})`,
+        allowed_mentions: {
+          users: [userID],
+        },
+      },
+    };
+  };
+
+const slashCommandHandler = createSlashCommandHandler({
+  applicationID: "810005674197123082", // @ts-ignore because vscode doesn't know about Workers Secrets
+  applicationSecret: DISCORD_SECRET, 
+  publicKey: "3367bb773f5b6194de5ae112c8730a1913757dfd5108a380b4d0795155947769",
+  commands: [[diceCommand, diceHandler]], // Update any time you add a new command.
+});
+
+addEventListener("fetch", (event) => {
+  event.respondWith(slashCommandHandler(event.request));
+});
