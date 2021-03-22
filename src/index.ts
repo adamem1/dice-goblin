@@ -31,6 +31,32 @@ const diceHandler: InteractionHandler = async (
     const options = interaction.data.options
     const diceInput =  options[0].value
     const dice = new Dice();
+    var numDice = diceInput.match(/^[0-9]{1,2}/);
+// Look for multiple dice being rolled, roll them individually and display the totals
+    if (diceInput.match(/^[0-9]{1,2}/ && numDice > 1)) {
+      let diceValue = diceInput.match(/d[0-9]{1,4}/)
+      var diceResultsArray = []; 
+      var i; 
+      // This needs to print each dice value
+      for (i = 0; i < numDice; i++) {
+        diceResultsArray[i] = dice.roll(diceInput).total;
+      }
+      // Get grand total
+      var result = diceResultsArray.reduce(function(a, b){
+        return a + b;
+      }, 0); 
+      var individualRollResults = diceResultsArray.join(" + ")
+      return {
+        type: InteractionResponseType.ChannelMessageWithSource,
+        data: {
+          content: `Rolled a \`${result}\` for <@${userID}> (${diceInput}). (${individualRollResults})`,
+          allowed_mentions: {
+            users: [userID],
+          },
+        },
+      }; 
+      }
+    else {
     const result = dice.roll(diceInput).total;
     return {
       type: InteractionResponseType.ChannelMessageWithSource,
@@ -41,6 +67,7 @@ const diceHandler: InteractionHandler = async (
         },
       },
     };
+  }
   };
 
 const slashCommandHandler = createSlashCommandHandler({
