@@ -45,11 +45,12 @@ const diceHandler: InteractionHandler = async (
       var result = diceResultsArray.reduce(function(a, b){
         return a + b;
       }, 0); 
+      // Write individual dice rolls to a string
       var individualRollResults = diceResultsArray.join(" + ")
       return {
         type: InteractionResponseType.ChannelMessageWithSource,
         data: {
-          content: `Rolled a \`${result}\` for <@${userID}> (${diceInput}). (${individualRollResults})`,
+          content: `Rolled a \`${result}\` for <@${userID}> (${diceInput})\. (\`${individualRollResults}\`)`,
           allowed_mentions: {
             users: [userID],
           },

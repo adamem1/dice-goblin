@@ -1,5 +1,10 @@
 dist
+.gitignore
 node_modules
 transpiled
 worker
 wrangler.toml
+LICENSE_APACHE
+LICENSE_MIT
+.prettierrc
+.cargo-ok
