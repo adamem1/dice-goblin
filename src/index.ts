@@ -39,9 +39,8 @@ const diceHandler: InteractionHandler = async (
       let diceValue = diceInput.match(/d[0-9]{1,4}/)
       var diceResultsArray = []; 
       var i; 
-      // This needs to print each dice value
       for (i = 0; i < numDice; i++) {
-        diceResultsArray[i] = dice.roll(diceInput).total;
+        diceResultsArray[i] = dice.roll(diceValue).total;
       }
       // Get grand total
       var result = diceResultsArray.reduce(function(a, b){
@@ -52,7 +51,7 @@ const diceHandler: InteractionHandler = async (
       return {
         type: InteractionResponseType.ChannelMessageWithSource,
         data: {
-          content: `I rolled a \`${result}\` for <@${userID}> (${diceInput}) (\`${individualRollResults}\`)`,
+          content: `I rolled a \`${result}\` for <@${userID}>. (\`${individualRollResults}\`) using ${diceInput}.) `,
           allowed_mentions: {
             users: [userID],
           },
