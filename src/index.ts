@@ -32,8 +32,10 @@ const diceHandler: InteractionHandler = async (
     const diceInput =  options[0].value
     const dice = new Dice();
     var numDice = diceInput.match(/^[0-9]{1,2}/);
+    console.log(numDice);
+    console.log(typeof numDice);
 // Look for multiple dice being rolled, roll them individually and display the totals
-    if (diceInput.match(/^[0-9]{1,2}/ && numDice > 1)) {
+    if (numDice > 1) {
       let diceValue = diceInput.match(/d[0-9]{1,4}/)
       var diceResultsArray = []; 
       var i; 
@@ -50,7 +52,7 @@ const diceHandler: InteractionHandler = async (
       return {
         type: InteractionResponseType.ChannelMessageWithSource,
         data: {
-          content: `Rolled a \`${result}\` for <@${userID}> (${diceInput})\. (\`${individualRollResults}\`)`,
+          content: `I rolled a \`${result}\` for <@${userID}> (${diceInput}) (\`${individualRollResults}\`)`,
           allowed_mentions: {
             users: [userID],
           },
@@ -62,7 +64,7 @@ const diceHandler: InteractionHandler = async (
     return {
       type: InteractionResponseType.ChannelMessageWithSource,
       data: {
-        content: `Rolled a \`${result}\` for <@${userID}> (${diceInput})`,
+        content: `We rolled a \`${result}\` for <@${userID}> (${diceInput})`,
         allowed_mentions: {
           users: [userID],
         },
