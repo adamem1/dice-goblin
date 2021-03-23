@@ -31,12 +31,33 @@ const diceHandler: InteractionHandler = async (
     const options = interaction.data.options
     const diceInput =  options[0].value
     const dice = new Dice();
-    var numDice = diceInput.match(/^[0-9]{1,2}/);
-    const diceValue = diceInput.match(/d[0-9]{1,4}/)
+    //Ensure the D is in lower case
+    const lowerDice = diceInput.toLowerCase();
+
+    // Test input to make sure we understand the format. 
+
+    const regexDice = new RegExp(/^[0-9]{0,2}d[0-9]{1,3}[a-z]{0,2}$/);
+    if (!lowerDice.match(regexDice)) {
+      return {
+        type: InteractionResponseType.ChannelMessageWithSource,
+        data: {
+          content: `Not sure what you're talking about, <@${userID}>.`,
+          allowed_mentions: {
+            users: [userID],
+          },
+        },
+      }
+    }
+
+    // Parse the number of dice (numDice) and what kind of dice (diceValue)
+    var numDice = lowerDice.match(/^[0-9]{1,2}/);
+    const diceValue = lowerDice.match(/d[0-9]{1,4}/)
+    // We have to append 1 to diceValue for the for loop to work. 
     const one = '1'
     var newdiceValue = one.concat(diceValue)
+    // Also removing the console log seems to break. I don't know why. 
     console.log(diceValue)
-// Look for multiple dice being rolled, roll them individually and display the totals
+    // Look for multiple dice being rolled, roll them individually and display the totals
     if (numDice > 1) {
       var diceResultsArray = []; 
       var i; 
@@ -52,7 +73,7 @@ const diceHandler: InteractionHandler = async (
       return {
         type: InteractionResponseType.ChannelMessageWithSource,
         data: {
-          content: `Rolled a \`${result}\` for <@${userID}>. (\`${individualRollResults}\`) using ${diceInput}.) `,
+          content: `Rolled a \`${result}\` for <@${userID}>. (\`${individualRollResults}\`) using ${diceInput}. `,
           allowed_mentions: {
             users: [userID],
           },
@@ -60,7 +81,7 @@ const diceHandler: InteractionHandler = async (
       }; 
       }
     else {
-    const result = dice.roll(diceInput).total;
+    const result = dice.roll(lowerDice).total;
     return {
       type: InteractionResponseType.ChannelMessageWithSource,
       data: {
