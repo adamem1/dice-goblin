@@ -36,7 +36,7 @@ const diceHandler: InteractionHandler = async (
 
     // Test input to make sure we understand the format. 
 
-    const regexDice = new RegExp(/^[0-9]{0,2}d[0-9]{1,3}[a-z]{0,2}$/);
+    const regexDice = new RegExp(/^([0-9]{0,2}d[0-9]{1,3}[a-z]{0,2})(\+[0-9]{0,2})?$/);
     if (!lowerDice.match(regexDice)) {
       return {
         type: InteractionResponseType.ChannelMessageWithSource,
