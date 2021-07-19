@@ -76,7 +76,7 @@ const diceHandler: InteractionHandler = async (
         return a + b;
       }, 0); 
       // Get grand total
-      var grand_total = result + modifier;
+      var grand_total = Number(result) + Number(modifier);
       // Write individual dice rolls to a string
       var individualRollResults = diceResultsArray.join(" + ")
       return {
