@@ -9,6 +9,7 @@ import {
 } from "@glenstack/cf-workers-discord-bot";
 
 import { Dice } from "dice-typescript";
+import { stripIgnoredCharacters } from "graphql-compose/lib/graphql";
 
 const diceCommand: ApplicationCommand = {
   name: "roll", 
@@ -51,9 +52,15 @@ const diceHandler: InteractionHandler = async (
 
     // Parse the number of dice (numDice) and what kind of dice (diceValue)
     var numDice = lowerDice.match(/^[0-9]{1,2}/);
-    const diceValue = lowerDice.match(/d[0-9]{1,4}/)
+    const diceValue = lowerDice.match(/d[0-9]{1,4}/);
     // We have to append 1 to diceValue for the for loop to work. 
-    const one = '1'
+    const one = '1';
+    if (lowerDice.includes("+")){
+      var split_dice = lowerDice.split('+');
+      modifier = split_dice[1];
+    } else {
+     var modifier = '0'
+    }
     var newdiceValue = one.concat(diceValue)
     // Also removing the console log seems to break. I don't know why. 
     console.log(diceValue)
@@ -64,16 +71,18 @@ const diceHandler: InteractionHandler = async (
       for (i = 0; i < numDice; i++) {
         diceResultsArray[i] = dice.roll(newdiceValue).total;
       }
-      // Get grand total
+      // Get roll total
       var result = diceResultsArray.reduce(function(a, b){
         return a + b;
       }, 0); 
+      // Get grand total
+      var grand_total = result + modifier;
       // Write individual dice rolls to a string
       var individualRollResults = diceResultsArray.join(" + ")
       return {
         type: InteractionResponseType.ChannelMessageWithSource,
         data: {
-          content: `Rolled a \`${result}\` for <@${userID}>. (\`${individualRollResults}\`) using ${diceInput}. `,
+          content: `Rolled a \`${grand_total}\` for <@${userID}>. (\`${individualRollResults}\`) \+ ${modifier} using ${diceInput}. `,
           allowed_mentions: {
             users: [userID],
           },
