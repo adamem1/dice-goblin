@@ -71,7 +71,7 @@ const diceHandler: InteractionHandler = async (
     }
     if (modSign !== undefined) {
       if (!rawModifier || !/^[0-9]+$/.test(rawModifier)) {
-        return inputError(`\`${modSign}${rawModifier ?? ''}\` isn't a valid modifier — try \`+5\` or \`-2\``);
+        return inputError(`\`${modSign}${rawModifier || ''}\` isn't a valid modifier — try \`+5\` or \`-2\``);
       }
       if (rawModifier.length > 3) {
         return inputError(`Modifier too large — max is 999`);
@@ -82,12 +82,9 @@ const diceHandler: InteractionHandler = async (
       return inputError(`\`${rawSuffix}\` isn't a recognized modifier — use \`kh\`/\`kl\` for advantage/disadvantage, or e.g. \`4d6kh3\` to keep highest 3`);
     }
     const keepOp = suffixMatch ? suffixMatch[1] : null;
-    const keepNStr = suffixMatch ? (suffixMatch[2] ?? '') : '';
+    const keepNStr = suffixMatch ? (suffixMatch[2] || '') : '';
     const keepN = keepNStr ? parseInt(keepNStr, 10) : 0;
     const count = rawCount !== '' ? parseInt(rawCount, 10) : 1;
-    if (keepOp && !keepNStr && count > 1) {
-      return inputError(`Specify how many to keep — e.g. \`${count}d${rawSides}${keepOp}${count - 1}\``);
-    }
     if (keepOp && keepNStr && count <= 1) {
       return inputError(`\`${rawSuffix}\` needs multiple dice — e.g. \`4d6${keepOp}${keepNStr}\``);
     }
@@ -99,10 +96,10 @@ const diceHandler: InteractionHandler = async (
     }
 
     const sides = parseInt(rawSides, 10);
-    const modNum = modSign ? parseInt(rawModifier ?? '0', 10) * (modSign === '-' ? -1 : 1) : 0;
+    const modNum = modSign ? parseInt(rawModifier || '0', 10) * (modSign === '-' ? -1 : 1) : 0;
     const modDisplay = modSign ? ` ${modSign} ${rawModifier}` : '';
 
-    if (keepOp && !keepNStr) {
+    if (keepOp && count <= 1) {
       const roll1 = Math.floor(Math.random() * sides) + 1;
       const roll2 = Math.floor(Math.random() * sides) + 1;
       const isAdvantage = keepOp === 'kh';
@@ -128,7 +125,8 @@ const diceHandler: InteractionHandler = async (
       };
     }
 
-    if (keepOp && keepNStr) {
+    if (keepOp && count > 1) {
+      const n = keepNStr ? keepN : 1;
       const rolls: number[] = [];
       for (let i = 0; i < count; i++) {
         rolls.push(Math.floor(Math.random() * sides) + 1);
@@ -136,19 +134,24 @@ const diceHandler: InteractionHandler = async (
       const sortedDesc = [...rolls].sort((a, b) => b - a);
       const isKeepHigh = keepOp === 'kh';
       const allFormatted = sortedDesc.map((roll, i) => {
-        const isKept = isKeepHigh ? i < keepN : i >= count - keepN;
+        const isKept = isKeepHigh ? i < n : i >= count - n;
         return isKept ? `\`${roll}\`` : `~~${roll}~~`;
       }).join(', ');
       const keptSum = sortedDesc
-        .filter((_, i) => isKeepHigh ? i < keepN : i >= count - keepN)
+        .filter((_, i) => isKeepHigh ? i < n : i >= count - n)
         .reduce((a, b) => a + b, 0);
       const total = keptSum + modNum;
       const label = isKeepHigh ? 'highest' : 'lowest';
+      const cutoffValue = isKeepHigh ? sortedDesc[n - 1] : sortedDesc[count - n];
+      const hasTie = isKeepHigh
+        ? n < count && sortedDesc[n] === cutoffValue
+        : count - n > 0 && sortedDesc[count - n - 1] === cutoffValue;
+      const tieNote = hasTie ? ` *(tie at ${cutoffValue})*` : '';
 
       return {
         type: InteractionResponseType.ChannelMessageWithSource,
         data: {
-          content: `Rolling ${count}d${sides}, keeping ${label} ${keepN} for <@${userID}>: [${allFormatted}]${modDisplay} → \`${total}\``,
+          content: `Rolling ${count}d${sides}, keeping ${label} ${n} for <@${userID}>: [${allFormatted}]${tieNote}${modDisplay} → \`${total}\``,
           allowed_mentions: { users: [userID] },
         },
       };
