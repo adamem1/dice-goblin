@@ -29,6 +29,5 @@
   },
   "dependencies": {
     "@glenstack/cf-workers-discord-bot": "^1.1.1",
-    "dice-typescript": "^1.6.1"
   }
 }
