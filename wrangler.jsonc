@@ -1,0 +1,7 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "dice-goblin",
+  "main": "dist/worker.production.js",
+  "compatibility_date": "2026-06-04",
+  "no_bundle": true
+}
