@@ -16,7 +16,7 @@ const diceCommand: ApplicationCommand = {
   options: [
     {
       name: 'dice',
-      description: 'What kind of dice and how many? Eg 1d20',
+      description: 'Eg: 1d20, 2d6+3, 1d20-1, d20kh (advantage), d20kl (disadvantage), 4d6kh3 (keep highest 3)',
       required: true,
       type: ApplicationCommandOptionType.STRING
 
